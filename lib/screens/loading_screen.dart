@@ -15,6 +15,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    print('initState');
+    getLocation();
+  }
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
+    print('deactive call');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(

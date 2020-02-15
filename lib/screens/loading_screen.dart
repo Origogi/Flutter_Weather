@@ -1,5 +1,6 @@
+import 'package:clima/services/location.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -8,10 +9,11 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   void getLocation() async {
-    Position position = await Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
+    Location location = Location();
+    await location.getLocation();
 
-    print(position);
+    print(location.lattitude);
+    print(location.longtitude);
   }
 
   @override
@@ -19,25 +21,37 @@ class _LoadingScreenState extends State<LoadingScreen> {
     super.initState();
     print('initState');
     getLocation();
+    getData();
   }
 
   @override
   void deactivate() {
-    // TODO: implement deactivate
     super.deactivate();
     print('deactive call');
   }
 
+  void getData() async  {
+    String url =
+        'api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=6ae17db0b708df19d6a3124032a2ef7b';
+    Response response = await get(url);
+    print(response);
+  }
+
   @override
   Widget build(BuildContext context) {
+    String myMargin = '15';
+    double myMarginAsADouble;
+
+    try {
+      myMarginAsADouble = double.parse(myMargin);
+    } catch (e) {
+      print(e);
+    }
+
     return Scaffold(
-      body: Center(
-        child: RaisedButton(
-          onPressed: () {
-            getLocation();
-          },
-          child: Text('Get Location'),
-        ),
+      body: Container(
+        margin: EdgeInsets.all(myMarginAsADouble ?? 30.0),
+        color: Colors.red,
       ),
     );
   }

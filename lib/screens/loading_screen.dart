@@ -1,7 +1,12 @@
+import 'package:clima/screens/location_screen.dart';
 import 'package:clima/services/location.dart';
+import 'package:clima/services/networking.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+const String apiKey = '6ae17db0b708df19d6a3124032a2ef7b';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -9,20 +14,37 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  void getLocation() async {
+  double longtitude;
+  double lattitude;
+
+  void getLocationData() async {
     Location location = Location();
     await location.getLocation();
 
-    print(location.lattitude);
-    print(location.longtitude);
+    longtitude = location.longtitude;
+    lattitude = location.lattitude;
+
+    NetworkHelper networkHelper = NetworkHelper(
+        'https://api.openweathermap.org/data/2.5/weather?lat=$lattitude&lon=$longtitude&appid=$apiKey');
+
+    var weatherData = await networkHelper.getData();
+
+    var temperature = weatherData['main']['temp'];
+    var condition = weatherData['weather'][0]['id'];
+    var cityName = weatherData['name'];
+
+    print('$temperature $condition $cityName');
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return LocationScreen();
+    }));
   }
 
   @override
   void initState() {
     super.initState();
     print('initState');
-    getLocation();
-    getData();
+    getLocationData();
   }
 
   @override
@@ -31,11 +53,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
     print('deactive call');
   }
 
-  void getData() async  {
+  void getData() async {
     String url =
-        'https://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=6ae17db0b708df19d6a3124032a2ef7b';
+        'https://api.openweathermap.org/data/2.5/weather?lat=$lattitude&lon=$longtitude&appid=$apiKey';
     http.Response response = await http.get(url);
-    
+
     if (response.statusCode == 200) {
       String data = response.body;
       print(data);
@@ -47,8 +69,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       var cityName = decodeData['name'];
 
       print('$temperature $condition $cityName');
-    }
-    else {
+    } else {
       print(response.statusCode);
     }
   }
@@ -65,9 +86,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 
     return Scaffold(
-      body: Container(
-        margin: EdgeInsets.all(myMarginAsADouble ?? 30.0),
-        color: Colors.red,
+      body: Center(
+        child: SpinKitDoubleBounce(
+          color : Colors.white,
+          size : 100
+        ),
       ),
     );
   }
